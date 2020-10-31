@@ -1,12 +1,12 @@
 # blockchain-votes
 Blockchain voting system
-# blockchain-votes
-Blockchain voting system
 
 # Intallation
 pip install flask==0.12.2
+
 pip install  requests==2.18.4
-use Postman Http Client for test https://www.getpostman.com
+
+use Postman Http Client for testing the API https://www.getpostman.com
 
 
 # Nodes test
