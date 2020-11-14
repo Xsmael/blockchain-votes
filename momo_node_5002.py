@@ -7,7 +7,6 @@ Created on Thu Oct 29 02:25:52 2020
 """
 
 #Module 2
- 
 
 import datetime
 import hashlib
