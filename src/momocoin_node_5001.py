@@ -18,6 +18,12 @@ from uuid import uuid4
 from urllib.parse import urlparse
 from ast import literal_eval
 
+def printty(obj):
+    """ 
+    Pretty print objects
+    """
+    print (json.dumps(obj, indent=4))
+
 
 # Part 1 Building my first blockchain
 
@@ -27,7 +33,7 @@ class Blockchain:
         # Store information about the balance, public Address and socket
         self.node = {'socket': '127.0.0.1:5001',
                      'balance': 500,
-                     'publicA': 'Mohamed'
+                     'publicA': 'Ismael'
 
                      }
         self.chain = []
@@ -129,12 +135,13 @@ class Blockchain:
         '''
         # -------------------------------- Permit to modify balance of orther node  for each transaction
         for node in network:
+            printty(node["socket"])
             response = requests.get(f'http://{node["socket"]}/getChain')
             nodeInfo = requests.get(f'http://{node["socket"]}/getNodeInfo')
             if response.status_code == 200:
                 if nodeInfo.json()['publicA'] == receiver:
                     # To review
-                    requests.get(f'http://{node["socket"]}/modifyBalance')
+                    requests.post(f'http://{node["socket"]}/modifyBalance',amount)
         # ---------------------------------
 
         self.transactions.append({'sender': sender,
@@ -227,7 +234,7 @@ def mineBlock():
         # To build a new block we must  have the proof and the previoushash
         proof = blockchain.proofOfWork(previousProof)
         previousHash = blockchain.hash(previousBlock)
-        blockchain.addTransaction(sender=nodeAddress, receiver='Mohamed', amount=1)
+        blockchain.addTransaction(sender=nodeAddress, receiver=blockchain.node['publicA'], amount=1)
         blockchain.node['balance'] += 1
         block = blockchain.createBlock(proof, previousHash)
 
@@ -287,6 +294,8 @@ def isValid():
 # Adding a new transaction to the blockchain
 @app.route('/addTransaction', methods=['POST'])
 def addTransaction():
+    print("Route /addTransaction Adding transaction.... ")
+
     json = request.get_json()  # the file where are the transactions
 
     transactions_keys = ['receiver', 'amount']
@@ -365,8 +374,8 @@ def getNodeInfo():
 # Get Modify balance # To do Don't work as expected
 @app.route('/modifyBalance', methods=['POST'])
 def modifyBalance():
-    json = request.get_json()
-    blockchain.addCoin(20)
+    amount = request.get_json()
+    blockchain.addCoin(amount)
     response = {'modifyBalance': blockchain.node['balance']}
     return jsonify(response), 200
 
