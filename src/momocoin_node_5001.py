@@ -18,6 +18,8 @@ from uuid import uuid4
 from urllib.parse import urlparse
 from ast import literal_eval
 
+BLOCK_SIZE=2
+
 def printty(obj):
     """ 
     Pretty print objects
@@ -135,13 +137,12 @@ class Blockchain:
         '''
         # -------------------------------- Permit to modify balance of orther node  for each transaction
         for node in network:
-            printty(node["socket"])
             response = requests.get(f'http://{node["socket"]}/getChain')
             nodeInfo = requests.get(f'http://{node["socket"]}/getNodeInfo')
             if response.status_code == 200:
                 if nodeInfo.json()['publicA'] == receiver:
                     # To review
-                    requests.post(f'http://{node["socket"]}/modifyBalance',amount)
+                    requests.post(f'http://{node["socket"]}/modifyBalance',{},amount)
         # ---------------------------------
 
         self.transactions.append({'sender': sender,
@@ -153,7 +154,7 @@ class Blockchain:
 
     # Add coin
     def addCoin(self, amount):
-        blockchain.node['balance'] += amount
+        blockchain.node['balance'] += int(amount)
         return "reussi", 200
 
     # Add nodes
@@ -306,13 +307,13 @@ def addTransaction():
             'Valid format': '{receiver: string, amount: number}'
         }
         return jsonify(response), 400
-    if len(blockchain.transactions) == 12:
+    if len(blockchain.transactions) == BLOCK_SIZE:
         response = requests.get(f'http://{blockchain.node["socket"]}/getChain')
         return jsonify(response), 200
     else:
         # Check if the node have enougth money to send
         if blockchain.node['balance'] < json['amount']:
-            return 'You don\'t have enough to send ', 400
+            return 'You don\'t have enough to send ', 
         index = blockchain.addTransaction(
             nodeAddress, json['receiver'], json['amount'])
         # Decrease his balance
@@ -374,7 +375,9 @@ def getNodeInfo():
 # Get Modify balance # To do Don't work as expected
 @app.route('/modifyBalance', methods=['POST'])
 def modifyBalance():
+    print("@app.route('/modifyBalance'")
     amount = request.get_json()
+    print(amount)
     blockchain.addCoin(amount)
     response = {'modifyBalance': blockchain.node['balance']}
     return jsonify(response), 200
